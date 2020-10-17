@@ -1,0 +1,79 @@
+<!doctype html>
+<header>
+	<title>AirFoil</title>
+	<script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+	<script>
+		function submit() {
+			var angle = document.getElementById("angle").value;
+			var url = "http://localhost:5000/airfoil/angle/"+angle.toString()+"/";
+			$.get(url, function(data){
+				if () {  // failed submission
+					alert("failed, please resubmit!");
+				} else {
+					document.getElementById("notification").style.display = "block";
+					var task_span = document.getElementById("task_span");
+					var submit_button = document.getElementById("submit_button");
+                                	task_span.textContent = data;
+					submit_button.disabled = true;
+				}
+			});
+		}
+		function result() {
+			var task_id = document.getElementById("task_id").value;
+			var url = "http://localhost:5000/airfoil/result/"+task_id.toString()+"/";
+			$.get(url, function(data){
+				if () {  // still running
+					alert("still running");
+				} else if () {  // failed
+					alert("failed");
+					var submit_button = document.getElementById("submit_button");
+					submit_button.disabled = false;
+				} else {
+					var submit_button = document.getElementById("submit_button");
+					submit_button.disabled = false;
+					document.getElementById("result").style.display = "block";
+					chart(data);
+				}
+			});
+		}
+		function chart(data){
+			var task_sddpan = document.getElementById("task_span");
+                        task_span.textContent = data.angle;  // return angle with force lists
+
+			var ctx = document.getElementById('myChart').getContext('2d');
+			var chart = new Chart(ctx, {
+    				type: 'horizontalBar',  // line, dual y axis
+    				data: {
+        				labels: data.label,
+        				datasets: [{
+            					label: 'Word Frequencies',
+            					backgroundColor: 'rgb(255, 99, 132)',
+            					borderColor: 'rgb(255, 99, 132)',
+            					data: data.data  //  lift and drag force
+        				}]
+    				},
+    				options: {}
+			});
+		}
+	</script>
+</header>
+
+<body>
+	<div>
+		<p>Hej! This is AirFoil</p>
+	</div>
+	<div>
+		<p>Please input at which angle the lift and drag forces to be analyzed: </p>
+		<input type="number" id="angle"><button id="submit_button" onclick="submit()">SUBMIT</button>
+	</div>
+	<div id="notification" style="display: none;">
+		<p>Task has been submitted with id: </p><span id="task_span"></span>
+		<button onclick="result()">Check Result</button>
+	</div>
+	<div id="result" style="width:50%">
+		<span id="angle_span"></span>
+		<canvas id="myChart"></canvas>
+	</div>
+</body>
+</html>
