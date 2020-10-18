@@ -1,0 +1,21 @@
+#cloud-config
+
+apt_update: true
+apt_upgrade: true
+packages:
+ - python3-pip
+ - python3-dev
+ - build-essential
+byobu_default: system 
+
+runcmd:
+# - echo "export PATH=$PATH:/usr/games" >> /home/ubuntu/.bashrc  
+ - source /home/ubuntu/.bashrc
+ - pip3 install Flask
+ - python3 /home/ubuntu/cowsay-app.py & 
+ - sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+ - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+ - sudo apt-get update
+ - sudo apt-get install -y docker-ce
+ubuntu@test-1:~$ 
+
