@@ -27,3 +27,5 @@ if "group7_master" not in list(map(lambda x:x.name, nova.keypairs.list())):
         print("Key pair of this master node is generated as 'group7_master'.")
     else:
         print("Please run this script only on the master node!")
+else:
+    print("Key pair is already generated.")

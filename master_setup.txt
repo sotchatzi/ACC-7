@@ -1,0 +1,17 @@
+sudo apt-get install -y rabbitmq-server
+sudo apt install python3-pip
+pip3 install --upgrade pip
+pip3 install flower
+export PATH=$PATH:/home/ubuntu/.local/bin
+
+# sudo rabbitmqctl add_user js js
+# sudo rabbitmqctl add_vhost jsvhost
+# sudo rabbitmqctl set_permissions -p jsvhost js ".*" ".*" ".*"
+
+# install redis https://redis.io/topics/quickstart
+redis-server /home/ubuntu/ACC-7/redis.conf
+
+# use current master address in celery setting.
+
+celery flower -A tasks --workdir /home/ubuntu/ACC-7/ --port=1234
+
