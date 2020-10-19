@@ -16,12 +16,15 @@ def test(parameter_1):
 def tweet_index():
     return render_template('index.html')
 
-@app.route('/airfoil/angle/<int:angle>/', methods=['GET'])
-def airfoil(angle):
-    n_nodes = 100
-    n_levels = 0
-    speed = 10
-    time = 0.05
+@app.route('/airfoil/submit/', methods=['POST'])
+def airfoil():
+    parameters = request.get_json()
+    print(parameters)
+    angle = parameters.get("angle")
+    n_nodes = parameters.get("n_nodes", 100)  # 100
+    n_levels = parameters.get("n_levels", 0)  # 0
+    speed = parameters.get("speed", 10)  # 10
+    time = parameters.get("time", 0.5)  # 0.05
     persisted_result = f"{RESULT_FOLDER}/a{angle}n{n_nodes}l{n_levels}s{speed}t{time}.json"
     if glob(persisted_result):  # TODO: task submission when the same setting is running but not ready yet.
         with open(persisted_result) as f:

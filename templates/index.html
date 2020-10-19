@@ -6,16 +6,25 @@
 	<script>
 		function submit() {
 			var angle = document.getElementById("angle").value;
-			var url = "http://localhost:5000/airfoil/angle/"+angle.toString()+"/";
-			$.get(url, function(data){
-				if (data.status == "RESULT") {
-                                        chart(data.data);
-				} else {
-					document.getElementById("notification").style.display = "block";
-					var task_span = document.getElementById("task_span");
-					var submit_button = document.getElementById("submit_button");
-                                	task_span.textContent = data.task_id;
-					submit_button.disabled = true;
+			var n_nodes = document.getElementById("n_nodes").value;
+			var n_levels = document.getElementById("n_levels").value;
+			var speed = document.getElementById("speed").value;
+			var time = document.getElementById("time").value;
+			$.ajax({
+				url: "http://localhost:5000/airfoil/submit/",
+				type: "POST",
+                                contentType: 'application/json;charset=UTF-8',
+				data: JSON.stringify({"angle": angle, "n_nodes": n_nodes, "n_levels": n_levels, "speed": speed, "time": time}),
+				success: function(data) {
+					if (data.status == "RESULT") {
+                                        	chart(data.data);
+					} else {
+						document.getElementById("notification").style.display = "block";
+						var task_span = document.getElementById("task_span");
+						var submit_button = document.getElementById("submit_button");
+                                		task_span.textContent = data.task_id;
+						submit_button.disabled = true;
+					}
 				}
 			});
 		}
@@ -73,8 +82,12 @@
 		<p>Hej! This is AirFoil</p>
 	</div>
 	<div>
-		<p>Please input at which angle the lift and drag forces to be analyzed: </p>
-		<input type="number" id="angle"><button id="submit_button" onclick="submit()">SUBMIT</button>
+		<label>Angle: </label><input type="number" id="angle" required>
+		<label>Number of nodes: </label><input type="number" id="n_nodes" value=100>
+		<label>Number of levels: </label><input type="number" id="n_levels" value=0>
+		<label>Speed: </label><input type="number" id="speed" value=10>
+		<label>Time: </label><input type="number" id="time" value=0.05>
+		<button id="submit_button" onclick="submit()">SUBMIT</button>
 	</div>
 	<div id="notification" style="display: none;">
 		<p>Task has been submitted with id: </p><span id="task_span"></span>
