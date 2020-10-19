@@ -1,0 +1,5 @@
+This is used to generate an image, where the airfoil and celery are ready to run.
+The murtazo compression file has been recompressed with several modifications:
+1. two compressed sub-folders have been extracted. so do not have to extract multiple times;
+2. runme.sh in cloudnaca folder has been modified with GMSH directory in Ubuntu;
+3. executable airfoil has been made manually and copied to the right path.
