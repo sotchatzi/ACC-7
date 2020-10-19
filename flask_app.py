@@ -1,6 +1,12 @@
+import json
+from glob import glob
 from flask import Flask, request, jsonify, render_template
+from tasks import airfoil_task, get_task
 
 app = Flask(__name__)
+
+RESULT_FOLDER = "/home/ubuntu/ACC-7/result"
+
 
 @app.route('/test/<int:parameter_1>', methods=['GET'])
 def test(parameter_1):
@@ -12,12 +18,26 @@ def tweet_index():
 
 @app.route('/airfoil/angle/<int:angle>/', methods=['GET'])
 def airfoil(angle):
-    # if failed:
-    #     return jsonify("failed")
-    return jsonify('task_id')
+    n_nodes = 100
+    n_levels = 0
+    speed = 10
+    time = 0.05
+    persisted_result = f"{RESULT_FOLDER}/a{angle}n{n_nodes}l{n_levels}s{speed}t{time}.json"
+    if glob(persisted_result):  # TODO: task submission when the same setting is running but not ready yet.
+        with open(persisted_result) as f:
+            data = json.load(f)
+        return jsonify({"status": "RESULT", "data": data})
+    task = airfoil_task.delay(angle, n_nodes, n_levels, speed, time)
+    return jsonify({"status": task.status, "task_id": task.id})
 
-@app.route('/airfoil/result/<str:task_id>/', methods=['GET'])
+@app.route('/airfoil/result/<string:task_id>/', methods=['GET'])
 def airfoil_result(task_id):
-    # if not ready:
-    #     return jsonify('Running + time')
-    return jsonify('angle and force lists')
+    task = get_task(task_id)
+    if task.ready():
+        data = task.get()
+        persisted_result = f"{RESULT_FOLDER}/a{data['angle']}n{data['n_nodes']}l{data['n_levels']}s{data['speed']}t{data['time']}.json"
+        with open(persisted_result, 'w') as outfile:
+            json.dump(data, outfile)
+        return jsonify({"status": "RESULT", "data": data})
+    else:
+        return jsonify({"status": task.status})

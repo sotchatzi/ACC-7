@@ -8,52 +8,61 @@
 			var angle = document.getElementById("angle").value;
 			var url = "http://localhost:5000/airfoil/angle/"+angle.toString()+"/";
 			$.get(url, function(data){
-				if () {  // failed submission
-					alert("failed, please resubmit!");
+				if (data.status == "RESULT") {
+                                        chart(data.data);
 				} else {
 					document.getElementById("notification").style.display = "block";
 					var task_span = document.getElementById("task_span");
 					var submit_button = document.getElementById("submit_button");
-                                	task_span.textContent = data;
+                                	task_span.textContent = data.task_id;
 					submit_button.disabled = true;
 				}
 			});
 		}
 		function result() {
-			var task_id = document.getElementById("task_id").value;
+			var task_id = document.getElementById("task_span").textContent;
 			var url = "http://localhost:5000/airfoil/result/"+task_id.toString()+"/";
 			$.get(url, function(data){
-				if () {  // still running
-					alert("still running");
-				} else if () {  // failed
+				if (data.status == "RESULT") {
+					var submit_button = document.getElementById("submit_button");
+                                        submit_button.disabled = false;
+                                        chart(data.data);
+				} else if (data.status == "FAILED") {
 					alert("failed");
 					var submit_button = document.getElementById("submit_button");
 					submit_button.disabled = false;
-				} else {
-					var submit_button = document.getElementById("submit_button");
-					submit_button.disabled = false;
-					document.getElementById("result").style.display = "block";
-					chart(data);
+				} else if (data.status == "PENDING") {
+					alert("still running");
 				}
 			});
 		}
-		function chart(data){
-			var task_sddpan = document.getElementById("task_span");
-                        task_span.textContent = data.angle;  // return angle with force lists
-
+		function chart(data){  // echart
+			document.getElementById("result").style.display = "block";
+			var angle_sddpan = document.getElementById("angle_span");
+                        angle_span.textContent = "Angle: " + data.angle.toString(); 
 			var ctx = document.getElementById('myChart').getContext('2d');
 			var chart = new Chart(ctx, {
-    				type: 'horizontalBar',  // line, dual y axis
+    				type: 'line',  // dual y axis
     				data: {
-        				labels: data.label,
+        				labels: data.lift,
         				datasets: [{
-            					label: 'Word Frequencies',
+            					label: 'Lift',
             					backgroundColor: 'rgb(255, 99, 132)',
             					borderColor: 'rgb(255, 99, 132)',
-            					data: data.data  //  lift and drag force
-        				}]
+            					data: data.lift
+					}, {
+						label: 'Drag',
+						borderColor: 'rgb(99, 132, 255)',
+						data: data.drag
+					}]
     				},
-    				options: {}
+    				options: {
+					scales: {
+						xAxes: [{
+							display: false
+						}]
+					}
+				}
 			});
 		}
 	</script>
@@ -71,7 +80,7 @@
 		<p>Task has been submitted with id: </p><span id="task_span"></span>
 		<button onclick="result()">Check Result</button>
 	</div>
-	<div id="result" style="width:50%">
+	<div id="result" style="width:600px; height:400px;">
 		<span id="angle_span"></span>
 		<canvas id="myChart"></canvas>
 	</div>
