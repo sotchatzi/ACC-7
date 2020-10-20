@@ -11,7 +11,7 @@
 			var speed = document.getElementById("speed").value;
 			var time = document.getElementById("time").value;
 			$.ajax({
-				url: "http://localhost:5000/airfoil/submit/",
+				url: "{{ url_for("airfoil") }}",
 				type: "POST",
                                 contentType: 'application/json;charset=UTF-8',
 				data: JSON.stringify({"angle": angle, "n_nodes": n_nodes, "n_levels": n_levels, "speed": speed, "time": time}),
@@ -30,7 +30,8 @@
 		}
 		function result() {
 			var task_id = document.getElementById("task_span").textContent;
-			var url = "http://localhost:5000/airfoil/result/"+task_id.toString()+"/";
+			var t_url = "{{ url_for("airfoil_result", task_id='') }}";
+			var url = t_url.slice(0, -1) + task_id + "/";
 			$.get(url, function(data){
 				if (data.status == "RESULT") {
 					var submit_button = document.getElementById("submit_button");
