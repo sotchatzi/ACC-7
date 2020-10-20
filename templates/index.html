@@ -1,0 +1,101 @@
+<!doctype html>
+<header>
+	<title>AirFoil</title>
+	<script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+	<script>
+		function submit() {
+			var angle = document.getElementById("angle").value;
+			var n_nodes = document.getElementById("n_nodes").value;
+			var n_levels = document.getElementById("n_levels").value;
+			var speed = document.getElementById("speed").value;
+			var time = document.getElementById("time").value;
+			$.ajax({
+				url: "http://localhost:5000/airfoil/submit/",
+				type: "POST",
+                                contentType: 'application/json;charset=UTF-8',
+				data: JSON.stringify({"angle": angle, "n_nodes": n_nodes, "n_levels": n_levels, "speed": speed, "time": time}),
+				success: function(data) {
+					if (data.status == "RESULT") {
+                                        	chart(data.data);
+					} else {
+						document.getElementById("notification").style.display = "block";
+						var task_span = document.getElementById("task_span");
+						var submit_button = document.getElementById("submit_button");
+                                		task_span.textContent = data.task_id;
+						submit_button.disabled = true;
+					}
+				}
+			});
+		}
+		function result() {
+			var task_id = document.getElementById("task_span").textContent;
+			var url = "http://localhost:5000/airfoil/result/"+task_id.toString()+"/";
+			$.get(url, function(data){
+				if (data.status == "RESULT") {
+					var submit_button = document.getElementById("submit_button");
+                                        submit_button.disabled = false;
+                                        chart(data.data);
+				} else if (data.status == "FAILED") {
+					alert("failed");
+					var submit_button = document.getElementById("submit_button");
+					submit_button.disabled = false;
+				} else if (data.status == "PENDING") {
+					alert("still running");
+				}
+			});
+		}
+		function chart(data){  // echart
+			document.getElementById("result").style.display = "block";
+			var angle_sddpan = document.getElementById("angle_span");
+                        angle_span.textContent = "Angle: " + data.angle.toString(); 
+			var ctx = document.getElementById('myChart').getContext('2d');
+			var chart = new Chart(ctx, {
+    				type: 'line',  // dual y axis
+    				data: {
+        				labels: data.lift,
+        				datasets: [{
+            					label: 'Lift',
+            					backgroundColor: 'rgb(255, 99, 132)',
+            					borderColor: 'rgb(255, 99, 132)',
+            					data: data.lift
+					}, {
+						label: 'Drag',
+						borderColor: 'rgb(99, 132, 255)',
+						data: data.drag
+					}]
+    				},
+    				options: {
+					scales: {
+						xAxes: [{
+							display: false
+						}]
+					}
+				}
+			});
+		}
+	</script>
+</header>
+
+<body>
+	<div>
+		<p>Hej! This is AirFoil</p>
+	</div>
+	<div>
+		<label>Angle: </label><input type="number" id="angle" required>
+		<label>Number of nodes: </label><input type="number" id="n_nodes" value=100>
+		<label>Number of levels: </label><input type="number" id="n_levels" value=0>
+		<label>Speed: </label><input type="number" id="speed" value=10>
+		<label>Time: </label><input type="number" id="time" value=0.05>
+		<button id="submit_button" onclick="submit()">SUBMIT</button>
+	</div>
+	<div id="notification" style="display: none;">
+		<p>Task has been submitted with id: </p><span id="task_span"></span>
+		<button onclick="result()">Check Result</button>
+	</div>
+	<div id="result" style="width:600px; height:400px;">
+		<span id="angle_span"></span>
+		<canvas id="myChart"></canvas>
+	</div>
+</body>
+</html>
